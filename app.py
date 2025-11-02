@@ -133,7 +133,7 @@ extract_issue_chain = issue_extraction_prompt | llm | StrOutputParser() | (lambd
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
-# 3. 최종 '종합 추론'용 LLM 체인
+# 3. 최종 '종합 추론'용 LLM 체인 (🌟 판례 번호 언급하도록 수정됨)
 final_reasoning_prompt = ChatPromptTemplate.from_template("""
 당신은 매우 유능한 대한민국 변호사입니다.
 다음은 사용자의 질문과 관련하여 API로 검색된 '여러 개의 판례 요약'입니다.
@@ -147,7 +147,15 @@ final_reasoning_prompt = ChatPromptTemplate.from_template("""
 
 [법률 자문 (아래 양식 준수)]:
 1.  **핵심 쟁점:** (사용자의 질문을 바탕으로 핵심 법률 쟁점을 1문장으로 요약)
-2.  **관련 판례 분석:** (검색된 [참고 판례 목록]이 이 쟁점과 어떻게 관련되는지 분석합니다. 만약 검색된 판례가 질문과 관련이 없다면, "검색된 판례 중 질문과 직접 관련된 내용은 찾기 어렵습니다"라고 솔직하게 답변하고, 대신 일반적인 법률 원칙을 설명하세요.)
+
+2.  **관련 판례 분석:** (검색된 [참고 판례 목록]이 이 쟁점과 어떻게 관련되는지 분석합니다. 
+    
+    💡 **[중요 지시]** 판례를 언급할 때는 "[판례 1: {사건명} ({사건번호})]" 형식에서 **반드시 '사건번호'(예: "2021도3451")를 함께 인용**하세요.
+    
+    [예시]
+    * "대법원 2021도3451 판결(사건명: 강제추행)에서는..."
+    * "참고 판례(사건번호: 2017다12345)에 따르면...")
+
 3.  **종합 조언 및 결론:** (위 분석을 바탕으로, 사용자에게 "어떻게 하는 것이 유리하다" 또는 "어떤 점을 주장할 수 있다"는 식의 구체적인 조언을 2~3문장으로 제공)
 """)
 reasoning_chain = final_reasoning_prompt | llm | StrOutputParser()
