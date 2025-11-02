@@ -133,7 +133,7 @@ extract_issue_chain = issue_extraction_prompt | llm | StrOutputParser() | (lambd
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
-# 3. 최종 '종합 추론'용 LLM 체인 (🌟 판례 번호 언급하도록 수정됨)
+# 3. 최종 '종합 추론'용 LLM 체인 (🌟 버그 수정본 🌟)
 final_reasoning_prompt = ChatPromptTemplate.from_template("""
 당신은 매우 유능한 대한민국 변호사입니다.
 다음은 사용자의 질문과 관련하여 API로 검색된 '여러 개의 판례 요약'입니다.
@@ -150,7 +150,7 @@ final_reasoning_prompt = ChatPromptTemplate.from_template("""
 
 2.  **관련 판례 분석:** (검색된 [참고 판례 목록]이 이 쟁점과 어떻게 관련되는지 분석합니다. 
     
-    💡 **[중요 지시]** 판례를 언급할 때는 "[판례 1: {사건명} ({사건번호})]" 형식에서 **반드시 '사건번호'(예: "2021도3451")를 함께 인용**하세요.
+    💡 **[중요 지시]** 판례를 언급할 때는 "[판례 1: {{사건명}} ({{사건번호}})]" 형식에서 **반드시 '사건번호'(예: "2021도3451")를 함께 인용**하세요.
     
     [예시]
     * "대법원 2021도3451 판결(사건명: 강제추행)에서는..."
