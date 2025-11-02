@@ -1,0 +1,9 @@
+# requirements.txt
+streamlit
+requests
+langchain
+langchain-openai
+langchain-text-splitters
+langchain-community
+chromadb
+openai
