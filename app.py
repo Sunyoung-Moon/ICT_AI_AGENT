@@ -153,25 +153,44 @@ final_reasoning_prompt = ChatPromptTemplate.from_template("""
 reasoning_chain = final_reasoning_prompt | llm | StrOutputParser()
 
 # 4. Document 변환 함수
-def create_documents_and_format(details: list) -> (list, str):
+def create_documents_and_format(details: list) -> list:
+    """
+    [Streamlit 수정]
+    판례 본문 리스트(details)를 받아 벡터화를 위한 'Document' 리스트만 반환
+    """
     documents = []
-    # (이 함수는 Colab 버전과 동일하게 유지 - 수정 없음)
+    
     for i, detail in enumerate(details):
         if not detail: continue
             
+        # 벡터화(유사도 검색)에 사용할 내용 (판시사항 + 판결요지)
         content_to_embed = (
             f"판시사항: {detail.get('판시사항', '')}\n\n"
             f"판결요지: {detail.get('판결요지', '')}"
         )
-        metadata = { "source_id": detail.get('판례정보일련번호', 'N/A'), ... } # (내용 동일)
         
+        # 💡 [수정 완료]
+        # 에러가 발생한 ... 부분을 전체 코드로 복원했습니다.
+        # 이 metadata는 나중에 5단계(유사도 검색)에서 청크(chunk)와 함께 사용됩니다.
+        metadata = {
+            "source_id": detail.get('판례정보일련번호', 'N/A'),
+            "사건명": detail.get('사건명', 'N/A'),
+            "사건번호": detail.get('사건번호', 'N/A'),
+            "선고일자": detail.get('선고일자', 'N/A'),
+            "법원명": detail.get('법원명', 'N/A'),
+            # [참고] '판례상세링크'는 본문 API(detail)에 원래 없습니다.
+            # 따라서 이 링크는 항상 '#'으로 처리되며, 이는 정상입니다.
+            "상세링크": f"http://www.law.go.kr{detail.get('판례상세링크', '')}" if detail.get('판례상세링크') else "#"
+        }
+        
+        # 내용이 너무 짧으면 (50자 미만) 유효하지 않은 판례로 간주
         if len(content_to_embed) < 50: continue
             
+        # 1. 벡터화(유사도 검색)를 위한 Document 객체 생성
         documents.append(Document(page_content=content_to_embed, metadata=metadata))
         
     print(f"  -> 총 {len(details)}개의 본문 중 {len(documents)}개의 유효한 Document 생성 완료.")
-    # (formatted_context 부분은 현재 사용되지 않으므로, 이 함수에서는 'documents'만 반환해도 무방합니다.)
-    return documents
+    return documents # 🌟 Document 리스트만 반환
 
 
 # -----------------------------------------------------------------
